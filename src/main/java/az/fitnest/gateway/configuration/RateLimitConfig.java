@@ -24,6 +24,19 @@ public class RateLimitConfig {
 
         limits.put("general.write", 60);
         limits.put("general.read", 300);
+        limits.put("landing.read", 120);
+        limits.put("landing.media.get", 90);
+        limits.put("landing.write", 20);
+        limits.put("landing.contact-messages.post", 8);
+        limits.put("landing.contact-messages.daily", 40);
+        limits.put("bmi.calculate.post", 20);
+    }
+
+    public int getDailyLimit(String rateLimitKey) {
+        if ("landing.contact-messages.post".equals(rateLimitKey)) {
+            return limits.getOrDefault("landing.contact-messages.daily", 40);
+        }
+        return 0;
     }
 
     public int getLimit(String key) {
@@ -33,8 +46,12 @@ public class RateLimitConfig {
     public String getReadCategory(String path) {
         if (path.startsWith("/api/v1/auth/")) {
             return "AUTH_GET";
-        } else if (path.startsWith("/api/v1/me/")) {
+        } else if (path.startsWith("/api/v1/me/") || path.startsWith("/api/v2/me")) {
             return "ME_GET";
+        } else if (path.startsWith("/api/v1/public/landing/media/")) {
+            return "LANDING_MEDIA_GET";
+        } else if (path.startsWith("/api/v1/public/landing/")) {
+            return "LANDING_GET";
         } else if (path.startsWith("/api/v1/media/")) {
             return "MEDIA_GET";
         } else {
@@ -65,9 +82,26 @@ public class RateLimitConfig {
              return "auth.request-otp.post";
         }
 
+        if (path.startsWith("/api/v1/public/landing/contact-messages") && isWrite) {
+            return "landing.contact-messages.post";
+        }
+        if (path.startsWith("/api/v1/public/landing/") && isWrite) {
+            return "landing.write";
+        }
+        if (path.startsWith("/api/v1/bmi/") && isWrite) {
+            return "bmi.calculate.post";
+        }
+
         if (isWrite) {
             return "general.write";
-        } else if (isRead) {
+        }
+        if (path.startsWith("/api/v1/public/landing/media/")) {
+            return "landing.media.get";
+        }
+        if (path.startsWith("/api/v1/public/landing/")) {
+            return "landing.read";
+        }
+        if (isRead) {
             return "general.read";
         }
 

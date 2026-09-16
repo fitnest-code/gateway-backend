@@ -42,7 +42,10 @@ public class PathValidator {
         }
 
         if (path.contains("/admin/") || path.endsWith("/admin") ||
-                path.startsWith("/api/v1/me") || path.startsWith("/api/v1/internal/")) {
+                path.startsWith("/api/v1/me") || path.startsWith("/api/v2/me") ||
+                path.startsWith("/api/v3/me") ||
+                path.startsWith("/api/v3/subscription-packages") ||
+                path.startsWith("/api/v1/internal/")) {
             return true;
         }
 

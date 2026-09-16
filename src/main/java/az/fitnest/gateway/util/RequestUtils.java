@@ -3,26 +3,49 @@ package az.fitnest.gateway.util;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 
+import java.util.regex.Pattern;
+
 public class RequestUtils {
+
+    private static final Pattern IPV4 = Pattern.compile(
+            "^(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$");
+    private static final Pattern IPV6 = Pattern.compile("^[0-9a-fA-F:]{2,45}$");
 
     private RequestUtils() {
     }
 
     public static String extractClientIP(ServerHttpRequest request) {
-        String xForwardedFor = request.getHeaders().getFirst("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
+        String forwarded = firstValidIp(request.getHeaders().getFirst("X-Forwarded-For"));
+        if (forwarded != null) {
+            return forwarded;
         }
 
-        String xRealIP = request.getHeaders().getFirst("X-Real-IP");
-        if (xRealIP != null && !xRealIP.isEmpty()) {
-            return xRealIP;
+        String realIp = firstValidIp(request.getHeaders().getFirst("X-Real-IP"));
+        if (realIp != null) {
+            return realIp;
         }
 
         if (request.getRemoteAddress() != null && request.getRemoteAddress().getAddress() != null) {
             return request.getRemoteAddress().getAddress().getHostAddress();
         }
         return "unknown";
+    }
+
+    private static String firstValidIp(String headerValue) {
+        if (headerValue == null || headerValue.isBlank()) {
+            return null;
+        }
+        for (String part : headerValue.split(",")) {
+            String candidate = part.trim();
+            if (isValidIp(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isValidIp(String value) {
+        return IPV4.matcher(value).matches() || IPV6.matcher(value).matches();
     }
 
     public static String extractToken(ServerWebExchange exchange) {

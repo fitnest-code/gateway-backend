@@ -84,6 +84,27 @@ public class ResponseUtils {
         }
     }
 
+    public static Mono<Void> respondWithAccessDenied(org.springframework.web.server.ServerWebExchange exchange) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.FORBIDDEN);
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        ApiError error = ApiError.builder()
+                .code("FORBIDDEN")
+                .message(resolveMessage("error.forbidden"))
+                .status(HttpStatus.FORBIDDEN.value())
+                .path(exchange.getRequest().getPath().value())
+                .timestamp(java.time.OffsetDateTime.now())
+                .build();
+        try {
+            String json = OBJECT_MAPPER.writeValueAsString(error);
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            return response.writeWith(Mono.just(response.bufferFactory().wrap(bytes)));
+        } catch (JsonProcessingException e) {
+            return response.setComplete();
+        }
+    }
+
     public static Mono<Void> respondWithUnauthorized(org.springframework.web.server.ServerWebExchange exchange) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);

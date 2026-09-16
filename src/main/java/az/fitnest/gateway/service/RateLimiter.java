@@ -29,6 +29,7 @@ public class RateLimiter {
             Long.class
     );
     private static final Duration RATE_WINDOW = Duration.ofMinutes(1);
+    private static final Duration DAILY_WINDOW = Duration.ofDays(1);
     private static final java.util.regex.Pattern ID_PATTERN = java.util.regex.Pattern.compile("/\\d+");
     private static final java.util.regex.Pattern UUID_PATTERN = java.util.regex.Pattern.compile("/[a-f0-9]{24}");
     private final ReactiveRedisTemplate<String, String> redisTemplate;
@@ -54,8 +55,24 @@ public class RateLimiter {
             key = "ratelimit:write:" + identifier + ":" + normalizedPath;
         }
 
+        Mono<Long> minute = execute(key, limit, window);
+        int dailyLimit = rateLimitConfig.getDailyLimit(rateLimitKey);
+        if (dailyLimit <= 0) {
+            return minute;
+        }
+
+        String dailyKey = "ratelimit:daily:" + identifier + ":" + rateLimitKey;
+        return minute.flatMap(result -> {
+            if (result == -1) {
+                return Mono.just(-1L);
+            }
+            return execute(dailyKey, dailyLimit, DAILY_WINDOW.toMillis());
+        });
+    }
+
+    private Mono<Long> execute(String key, int limit, long windowMs) {
         return redisTemplate.execute(RATE_LIMIT_SCRIPT, Collections.singletonList(key),
-                        Arrays.asList(String.valueOf(limit), String.valueOf(window)))
+                        Arrays.asList(String.valueOf(limit), String.valueOf(windowMs)))
                 .next()
                 .defaultIfEmpty(0L);
     }

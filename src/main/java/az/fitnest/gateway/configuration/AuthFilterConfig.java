@@ -4,6 +4,7 @@ import az.fitnest.gateway.service.BlockManager;
 import az.fitnest.gateway.service.JwtProcessor;
 import az.fitnest.gateway.service.RateLimiter;
 import az.fitnest.gateway.security.CsrfValidator;
+import az.fitnest.gateway.security.LandingKeyValidator;
 import az.fitnest.gateway.security.PathValidator;
 import az.fitnest.gateway.security.SecurityHeaders;
 import az.fitnest.gateway.util.RequestUtils;
@@ -29,6 +30,9 @@ public class AuthFilterConfig {
 
     @Autowired
     private JwtProcessor jwtProcessor;
+
+    @Autowired
+    private LandingKeyValidator landingKeyValidator;
 
     @Bean
     public GlobalFilter authFilter() {
@@ -63,7 +67,12 @@ public class AuthFilterConfig {
                                 return ResponseUtils.respondWithTooManyRequests(sanitizedExchange);
                             }
 
-                            return proceedWithValidationResult(sanitizedExchange, chain, path, clientIP, token, validation);
+                            if (!landingKeyValidator.isAllowed(sanitizedExchange)) {
+                                return ResponseUtils.respondWithAccessDenied(sanitizedExchange);
+                            }
+
+                            ServerWebExchange forwarded = landingKeyValidator.stripKey(sanitizedExchange);
+                            return proceedWithValidationResult(forwarded, chain, path, clientIP, token, validation);
                         });
             });
         };
