@@ -37,7 +37,7 @@ public class PathValidator {
             return false;
         }
 
-        if (path.equals("/api/v1/goals") || path.startsWith("/api/v1/goals/")) {
+        if (path.startsWith("/api/v1/goals/images/")) {
             return false;
         }
 

@@ -50,7 +50,7 @@ public class RateLimitConfig {
             return "ME_GET";
         } else if (path.startsWith("/api/v1/public/landing/media/")) {
             return "LANDING_MEDIA_GET";
-        } else if (path.startsWith("/api/v1/public/landing/") || path.equals("/api/v1/goals") || path.startsWith("/api/v1/goals/")) {
+        } else if (path.startsWith("/api/v1/public/landing/")) {
             return "LANDING_GET";
         } else if (path.startsWith("/api/v1/media/")) {
             return "MEDIA_GET";
@@ -98,7 +98,7 @@ public class RateLimitConfig {
         if (path.startsWith("/api/v1/public/landing/media/")) {
             return "landing.media.get";
         }
-        if (path.startsWith("/api/v1/public/landing/") || path.equals("/api/v1/goals") || path.startsWith("/api/v1/goals/")) {
+        if (path.startsWith("/api/v1/public/landing/")) {
             return "landing.read";
         }
         if (isRead) {
