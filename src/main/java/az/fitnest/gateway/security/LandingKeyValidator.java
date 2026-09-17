@@ -25,7 +25,7 @@ public class LandingKeyValidator {
         if (path == null || !path.startsWith("/api/v1/public/landing/")) {
             return false;
         }
-        return !(isRead(method) && path.startsWith("/api/v1/public/landing/media/"));
+        return !(isRead(method) && isPublicLandingAsset(path));
     }
 
     public boolean isAllowed(ServerWebExchange exchange) {
@@ -67,6 +67,11 @@ public class LandingKeyValidator {
 
     private static boolean isRead(String method) {
         return "GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method);
+    }
+
+    private static boolean isPublicLandingAsset(String path) {
+        return path.startsWith("/api/v1/public/landing/media/")
+                || path.startsWith("/api/v1/public/landing/goals/images/");
     }
 
     private static boolean hasKeyInQuery(ServerHttpRequest request) {
