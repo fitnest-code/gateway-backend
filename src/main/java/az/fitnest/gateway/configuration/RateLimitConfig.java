@@ -29,12 +29,17 @@ public class RateLimitConfig {
         limits.put("landing.write", 20);
         limits.put("landing.contact-messages.post", 8);
         limits.put("landing.contact-messages.daily", 40);
+        limits.put("landing.bmi-requests.post", 5);
+        limits.put("landing.bmi-requests.daily", 15);
         limits.put("bmi.calculate.post", 20);
     }
 
     public int getDailyLimit(String rateLimitKey) {
         if ("landing.contact-messages.post".equals(rateLimitKey)) {
             return limits.getOrDefault("landing.contact-messages.daily", 40);
+        }
+        if ("landing.bmi-requests.post".equals(rateLimitKey)) {
+            return limits.getOrDefault("landing.bmi-requests.daily", 15);
         }
         return 0;
     }
@@ -48,9 +53,10 @@ public class RateLimitConfig {
             return "AUTH_GET";
         } else if (path.startsWith("/api/v1/me/") || path.startsWith("/api/v2/me")) {
             return "ME_GET";
-        } else if (path.startsWith("/api/v1/public/landing/media/")) {
+        } else if (path.startsWith("/api/v1/public/landing/media/")
+                || path.startsWith("/api/v1/public/landing/goals/images/")) {
             return "LANDING_MEDIA_GET";
-        } else if (path.startsWith("/api/v1/public/landing/")) {
+        } else if (path.startsWith("/api/v1/public/landing/") || path.equals("/api/v1/goals") || path.startsWith("/api/v1/goals/")) {
             return "LANDING_GET";
         } else if (path.startsWith("/api/v1/media/")) {
             return "MEDIA_GET";
@@ -85,6 +91,9 @@ public class RateLimitConfig {
         if (path.startsWith("/api/v1/public/landing/contact-messages") && isWrite) {
             return "landing.contact-messages.post";
         }
+        if (path.startsWith("/api/v1/public/landing/bmi-requests") && isWrite) {
+            return "landing.bmi-requests.post";
+        }
         if (path.startsWith("/api/v1/public/landing/") && isWrite) {
             return "landing.write";
         }
@@ -95,10 +104,11 @@ public class RateLimitConfig {
         if (isWrite) {
             return "general.write";
         }
-        if (path.startsWith("/api/v1/public/landing/media/")) {
+        if (path.startsWith("/api/v1/public/landing/media/")
+                || path.startsWith("/api/v1/public/landing/goals/images/")) {
             return "landing.media.get";
         }
-        if (path.startsWith("/api/v1/public/landing/")) {
+        if (path.startsWith("/api/v1/public/landing/") || path.equals("/api/v1/goals") || path.startsWith("/api/v1/goals/")) {
             return "landing.read";
         }
         if (isRead) {
