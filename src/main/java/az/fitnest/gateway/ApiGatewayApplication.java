@@ -91,6 +91,7 @@ public class ApiGatewayApplication {
                                 "/api/v1/public/landing/home/gyms",
                                 "/api/v1/public/landing/home/stores",
                                 "/api/v1/public/landing/gyms",
+                                "/api/v1/public/landing/gyms/filters",
                                 "/api/v1/public/landing/gyms/{gymId}",
                                 "/api/v1/public/landing/stores",
                                 "/api/v1/public/landing/stores/{storeId}",
