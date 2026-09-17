@@ -306,6 +306,7 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/coins/settings",
                                 "/api/v1/admin/coins/terms",
                                 "/api/v1/admin/coins/users/{userId}",
+                                "/api/v1/admin/coins/users/{userId}/balance",
                                 "/api/v1/admin/coins/adjust",
                                 "/api/v1/admin/coins/bulk-adjust",
                                 "/api/v1/admin/coins/bulk-adjust-all",
