@@ -29,12 +29,17 @@ public class RateLimitConfig {
         limits.put("landing.write", 20);
         limits.put("landing.contact-messages.post", 8);
         limits.put("landing.contact-messages.daily", 40);
+        limits.put("landing.bmi-requests.post", 5);
+        limits.put("landing.bmi-requests.daily", 15);
         limits.put("bmi.calculate.post", 20);
     }
 
     public int getDailyLimit(String rateLimitKey) {
         if ("landing.contact-messages.post".equals(rateLimitKey)) {
             return limits.getOrDefault("landing.contact-messages.daily", 40);
+        }
+        if ("landing.bmi-requests.post".equals(rateLimitKey)) {
+            return limits.getOrDefault("landing.bmi-requests.daily", 15);
         }
         return 0;
     }
@@ -85,6 +90,9 @@ public class RateLimitConfig {
 
         if (path.startsWith("/api/v1/public/landing/contact-messages") && isWrite) {
             return "landing.contact-messages.post";
+        }
+        if (path.startsWith("/api/v1/public/landing/bmi-requests") && isWrite) {
+            return "landing.bmi-requests.post";
         }
         if (path.startsWith("/api/v1/public/landing/") && isWrite) {
             return "landing.write";

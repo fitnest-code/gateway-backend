@@ -41,7 +41,8 @@ public class CorsConfig {
                 "Accept-Language",
                 "X-User-Email",
                 "X-User-Roles",
-                "X-Request-ID"
+                "X-Request-ID",
+                "X-FitNest-Landing-Key"
         ));
 
         config.setAllowCredentials(true);
