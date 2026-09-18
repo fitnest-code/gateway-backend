@@ -31,6 +31,8 @@ public class RateLimitConfig {
         limits.put("landing.contact-messages.daily", 40);
         limits.put("landing.bmi-requests.post", 5);
         limits.put("landing.bmi-requests.daily", 15);
+        limits.put("landing.partner-applications.post", 5);
+        limits.put("landing.partner-applications.daily", 15);
         limits.put("bmi.calculate.post", 20);
     }
 
@@ -40,6 +42,9 @@ public class RateLimitConfig {
         }
         if ("landing.bmi-requests.post".equals(rateLimitKey)) {
             return limits.getOrDefault("landing.bmi-requests.daily", 15);
+        }
+        if ("landing.partner-applications.post".equals(rateLimitKey)) {
+            return limits.getOrDefault("landing.partner-applications.daily", 15);
         }
         return 0;
     }
@@ -93,6 +98,9 @@ public class RateLimitConfig {
         }
         if (path.startsWith("/api/v1/public/landing/bmi-requests") && isWrite) {
             return "landing.bmi-requests.post";
+        }
+        if (path.startsWith("/api/v1/public/landing/partner-applications") && isWrite) {
+            return "landing.partner-applications.post";
         }
         if (path.startsWith("/api/v1/public/landing/") && isWrite) {
             return "landing.write";
