@@ -436,7 +436,10 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/subscription-packages/basic",
                                 "/api/v1/admin/subscription-packages/translations",
                                 "/api/v1/admin/subscription-packages/translations/bulk",
-                                "/api/v1/admin/subscription-packages/**",
+                                "/api/v1/campaigns",
+                                "/api/v1/campaigns/**",
+                                "/api/v1/admin/campaigns",
+                                "/api/v1/admin/campaigns/**",
                                 "/admin/subscription/**").uri("http://order-backend:8080"))
  
                         .route("user-backend", r -> r.path(
