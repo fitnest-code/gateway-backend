@@ -352,6 +352,7 @@ public class ApiGatewayApplication {
                                 "/payment/pre-auth-request",
                                 "/payment/pre-auth-complete",
                                 "/payment/widget-url",
+                                "/epoint/get-status",
                                 "/payment/wallet/status",
                                 "/payment/wallet/pay",
                                 "/payment/invoice/create",
