@@ -443,6 +443,13 @@ public class ApiGatewayApplication {
                                 "/api/v1/campaigns/**",
                                 "/api/v1/admin/campaigns",
                                 "/api/v1/admin/campaigns/**",
+                                "/api/v1/admin/promo-campaigns",
+                                "/api/v1/admin/promo-campaigns/**",
+                                "/api/v1/admin/promo-partners",
+                                "/api/v1/admin/promo-partners/**",
+                                "/api/v1/me/promo",
+                                "/api/v1/me/promo/**",
+                                "/api/v1/checkout/quote",
                                 "/admin/subscription/**").uri("http://order-backend:8080"))
  
                         .route("user-backend", r -> r.path(
