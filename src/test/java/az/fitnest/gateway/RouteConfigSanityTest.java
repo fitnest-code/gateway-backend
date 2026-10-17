@@ -32,6 +32,11 @@ class RouteConfigSanityTest {
             "\"/api/v1/admin/campaigns\"",
             "\"/api/v1/admin/campaigns/**\"");
 
+    /** Checkout paths the order-backend route must declare. */
+    private static final List<String> CHECKOUT_PATHS = List.of(
+            "\"/api/v1/checkout\"",
+            "\"/api/v1/checkout/**\"");
+
     private static String source;
 
     @BeforeAll
@@ -42,6 +47,15 @@ class RouteConfigSanityTest {
     @Test
     void orderBackendRoute_declaresEachCampaignPathExactlyOnce() {
         for (String path : CAMPAIGN_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void orderBackendRoute_declaresCheckoutPathsExactlyOnce() {
+        for (String path : CHECKOUT_PATHS) {
             assertThat(occurrences(source, path))
                     .as("route path %s must appear exactly once", path)
                     .isEqualTo(1);
