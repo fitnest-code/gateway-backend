@@ -1,23 +1,30 @@
 package az.fitnest.gateway.util;
 
+import az.fitnest.gateway.exception.ApiError;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import az.fitnest.gateway.exception.ApiError;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.time.OffsetDateTime;
 
 @Component
 public class ResponseUtils {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
+
     private static MessageSource messageSource;
 
     public ResponseUtils(MessageSource messageSource) {
@@ -38,91 +45,40 @@ public class ResponseUtils {
         return response.setComplete();
     }
 
-    public static Mono<Void> respondWithTooManyRequests(org.springframework.web.server.ServerWebExchange exchange) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        response.getHeaders().add("X-RateLimit-Remaining", "0");
-        response.getHeaders().add("X-RateLimit-Reset", String.valueOf(System.currentTimeMillis() + 60000));
-        response.getHeaders().add("Retry-After", "60");
-
-        ApiError error = ApiError.builder()
-                .code("TOO_MANY_REQUESTS")
-                .message(resolveMessage("error.too_many_requests"))
-                .status(HttpStatus.TOO_MANY_REQUESTS.value())
-                .path(exchange.getRequest().getPath().value())
-                .timestamp(java.time.OffsetDateTime.now())
-                .build();
-
-        try {
-            String jsonResponse = OBJECT_MAPPER.writeValueAsString(error);
-            byte[] bytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
-            return response.writeWith(Mono.just(response.bufferFactory().wrap(bytes)));
-        } catch (JsonProcessingException e) {
-            return response.setComplete();
-        }
+    public static Mono<Void> respondWithTooManyRequests(ServerWebExchange exchange) {
+        exchange.getResponse().getHeaders().add("X-RateLimit-Remaining", "0");
+        exchange.getResponse().getHeaders().add("X-RateLimit-Reset", String.valueOf(System.currentTimeMillis() + 60000));
+        exchange.getResponse().getHeaders().add("Retry-After", "60");
+        return writeError(exchange, HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", "error.too_many_requests");
     }
 
-    public static Mono<Void> respondWithForbidden(org.springframework.web.server.ServerWebExchange exchange) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-        ApiError error = ApiError.builder()
-                .code("UNAUTHORIZED")
-                .message(resolveMessage("error.unauthorized"))
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .path(exchange.getRequest().getPath().value())
-                .timestamp(java.time.OffsetDateTime.now())
-                .build();
-        try {
-            String json = OBJECT_MAPPER.writeValueAsString(error);
-            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-            return response.writeWith(Mono.just(response.bufferFactory().wrap(bytes)));
-        } catch (JsonProcessingException e) {
-            return response.setComplete();
-        }
+    public static Mono<Void> respondWithForbidden(ServerWebExchange exchange) {
+        return writeError(exchange, HttpStatus.FORBIDDEN, "FORBIDDEN", "error.forbidden");
     }
 
-    public static Mono<Void> respondWithAccessDenied(org.springframework.web.server.ServerWebExchange exchange) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.FORBIDDEN);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-        ApiError error = ApiError.builder()
-                .code("FORBIDDEN")
-                .message(resolveMessage("error.forbidden"))
-                .status(HttpStatus.FORBIDDEN.value())
-                .path(exchange.getRequest().getPath().value())
-                .timestamp(java.time.OffsetDateTime.now())
-                .build();
-        try {
-            String json = OBJECT_MAPPER.writeValueAsString(error);
-            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-            return response.writeWith(Mono.just(response.bufferFactory().wrap(bytes)));
-        } catch (JsonProcessingException e) {
-            return response.setComplete();
-        }
+    public static Mono<Void> respondWithUnauthorized(ServerWebExchange exchange) {
+        return writeError(exchange, HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "error.unauthorized");
     }
 
-    public static Mono<Void> respondWithUnauthorized(org.springframework.web.server.ServerWebExchange exchange) {
+    private static Mono<Void> writeError(ServerWebExchange exchange, HttpStatus status, String code, String messageKey) {
         ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
         ApiError error = ApiError.builder()
-                .code("UNAUTHORIZED")
-                .message(resolveMessage("error.unauthorized"))
-                .status(HttpStatus.UNAUTHORIZED.value())
+                .code(code)
+                .message(resolveMessage(messageKey))
+                .status(status.value())
                 .path(exchange.getRequest().getPath().value())
-                .timestamp(java.time.OffsetDateTime.now())
+                .timestamp(OffsetDateTime.now())
                 .build();
+
+        byte[] body;
         try {
-            String json = OBJECT_MAPPER.writeValueAsString(error);
-            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-            return response.writeWith(Mono.just(response.bufferFactory().wrap(bytes)));
+            body = OBJECT_MAPPER.writeValueAsBytes(error);
         } catch (JsonProcessingException e) {
             return response.setComplete();
         }
+        return response.writeWith(Mono.just(response.bufferFactory().wrap(body)));
     }
 }
