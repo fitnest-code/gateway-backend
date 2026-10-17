@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *   <li>A {@code csrfTokenHttpOnly} cookie must be present before anything is
  *       enforced — browsers without the cookie (e.g. first visit) skip the
  *       check.</li>
- *       <li>Enforcement (401 response) happens when the request is a
+ *       <li>Enforcement (403 response) happens when the request is a
  *       state-changing method (POST/PUT/DELETE/PATCH) OR an
  *       {@code /api/v1/admin/} path, the path starts with {@code /api/v1/},
  *       and the {@code X-CSRF-Token} header is missing or differs from the
@@ -94,8 +94,8 @@ class CsrfValidatorTest {
 
         HttpStatusCode status = enforce(exchange, "/api/v1/orders", "POST");
 
-        // respondWithForbidden() actually sets 401 UNAUTHORIZED (name is misleading).
-        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED);
+        // A failed CSRF check is a permission problem, not a missing login.
+        assertThat(status).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -105,7 +105,7 @@ class CsrfValidatorTest {
 
         HttpStatusCode status = enforce(exchange, "/api/v1/orders", "POST");
 
-        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(status).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -126,7 +126,7 @@ class CsrfValidatorTest {
 
         HttpStatusCode status = enforce(exchange, "/api/v1/orders", method);
 
-        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(status).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     // ---------------------------------------------------------------------
@@ -154,7 +154,7 @@ class CsrfValidatorTest {
 
         HttpStatusCode status = enforce(exchange, "/api/v1/admin/users", "GET");
 
-        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(status).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -198,7 +198,7 @@ class CsrfValidatorTest {
 
         HttpStatusCode status = enforce(exchange, "/api/v1/orders", "POST");
 
-        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(status).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     // ---------------------------------------------------------------------
@@ -223,7 +223,7 @@ class CsrfValidatorTest {
 
     /**
      * Runs the validator and returns the response status: {@code null} means
-     * no response was written (request proceeds), 401 means rejected.
+     * no response was written (request proceeds), 403 means rejected.
      */
     private static HttpStatusCode enforce(MockServerWebExchange exchange, String path, String method) {
         CsrfValidator.validateCsrfToken(exchange, path, method).block();
