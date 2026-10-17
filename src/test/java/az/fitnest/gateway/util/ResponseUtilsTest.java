@@ -26,6 +26,7 @@ class ResponseUtilsTest {
         assertThat(exchange.getResponse().getHeaders().getContentType().toString())
                 .isEqualTo("application/json");
         assertThat(exchange.getResponse().getBodyAsString().block())
+                .startsWith("{\"error\":{")
                 .contains("\"code\":\"UNAUTHORIZED\"")
                 .contains("\"path\":\"/api/v1/me/promo/active\"")
                 .contains("\"timestamp\":");
@@ -39,6 +40,7 @@ class ResponseUtilsTest {
 
         assertThat(exchange.getResponse().getStatusCode().value()).isEqualTo(403);
         assertThat(exchange.getResponse().getBodyAsString().block())
+                .startsWith("{\"error\":{")
                 .contains("\"code\":\"FORBIDDEN\"")
                 .contains("\"status\":403");
     }
