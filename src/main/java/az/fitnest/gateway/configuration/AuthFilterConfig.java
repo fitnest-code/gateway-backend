@@ -9,6 +9,8 @@ import az.fitnest.gateway.security.PathValidator;
 import az.fitnest.gateway.security.SecurityHeaders;
 import az.fitnest.gateway.util.RequestUtils;
 import az.fitnest.gateway.util.ResponseUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -21,6 +23,8 @@ import java.util.UUID;
 
 @Configuration
 public class AuthFilterConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthFilterConfig.class);
 
     @Autowired
     private RateLimiter rateLimiter;
@@ -53,7 +57,7 @@ public class AuthFilterConfig {
             String token = RequestUtils.extractToken(sanitizedExchange);
             Mono<JwtProcessor.TokenValidationResult> validationMono = (token != null && !token.isEmpty())
                     ? jwtProcessor.validateToken(token)
-                    : Mono.just(new JwtProcessor.TokenValidationResult(false, null, null, null, null, null));
+                    : Mono.just(JwtProcessor.TokenValidationResult.rejected(JwtProcessor.RejectionReason.MISSING_TOKEN));
 
             return validationMono.flatMap(validation -> {
                 String identifier = clientIP;
@@ -68,7 +72,7 @@ public class AuthFilterConfig {
                             }
 
                             if (!landingKeyValidator.isAllowed(sanitizedExchange)) {
-                                return ResponseUtils.respondWithAccessDenied(sanitizedExchange);
+                                return ResponseUtils.respondWithForbidden(sanitizedExchange);
                             }
 
                             ServerWebExchange forwarded = landingKeyValidator.stripKey(sanitizedExchange);
@@ -99,7 +103,7 @@ public class AuthFilterConfig {
         boolean requiresAuth = PathValidator.requiresAuth(path);
 
         if (requiresAuth && (token == null || token.isEmpty() || !validation.valid)) {
-            return handleAuthFailure(exchange, clientIP, path);
+            return handleAuthFailure(exchange, clientIP, path, rejectionReason(validation));
         }
 
         if (token != null && !token.isEmpty()) {
@@ -109,10 +113,26 @@ public class AuthFilterConfig {
         return chain.filter(addAnonymousHeaders(exchange, clientIP));
     }
 
-    private Mono<Void> handleAuthFailure(ServerWebExchange exchange, String clientIP, String path) {
+    private Mono<Void> handleAuthFailure(ServerWebExchange exchange, String clientIP, String path,
+                                        JwtProcessor.RejectionReason reason) {
+        if (reason == JwtProcessor.RejectionReason.MISSING_TOKEN) {
+            log.debug("Unauthenticated request to {} from {} (X-Forwarded-For: {})",
+                    path, clientIP, RequestUtils.forwardedForHeader(exchange.getRequest()));
+        } else {
+            log.warn("Rejecting request to {} from {} (X-Forwarded-For: {}): token {}",
+                    path, clientIP, RequestUtils.forwardedForHeader(exchange.getRequest()), reason);
+        }
+
         Mono<Void> recordMono = path.equals("/api/v1/auth/verify-otp") ?
                 Mono.empty() : blockManager.recordFailedAttempt(clientIP, null).then();
         return recordMono.then(ResponseUtils.respondWithUnauthorized(exchange));
+    }
+
+    private static JwtProcessor.RejectionReason rejectionReason(JwtProcessor.TokenValidationResult validation) {
+        if (validation.rejectionReason != null) {
+            return validation.rejectionReason;
+        }
+        return validation.valid ? null : JwtProcessor.RejectionReason.INVALID_TOKEN;
     }
 
     private Mono<Void> handleTokenValidation(ServerWebExchange exchange, GatewayFilterChain chain,
@@ -120,7 +140,7 @@ public class AuthFilterConfig {
                                              String clientIP, String path, String token) {
         if (!validation.valid) {
             if (requiresAuth) {
-                return handleAuthFailure(exchange, clientIP, path);
+                return handleAuthFailure(exchange, clientIP, path, rejectionReason(validation));
             } else {
                 return chain.filter(addAnonymousHeaders(exchange, clientIP));
             }
@@ -129,6 +149,7 @@ public class AuthFilterConfig {
         return blockManager.isBlocked(clientIP, validation.email)
                 .flatMap(blocked -> {
                     if (blocked) {
+                        log.warn("Blocked request to {} from {} (user {})", path, clientIP, validation.userId);
                         return ResponseUtils.respondWithForbidden(exchange);
                     }
 

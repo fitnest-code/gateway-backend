@@ -3,13 +3,10 @@ package az.fitnest.gateway.util;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 
-import java.util.regex.Pattern;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 
 public class RequestUtils {
-
-    private static final Pattern IPV4 = Pattern.compile(
-            "^(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$");
-    private static final Pattern IPV6 = Pattern.compile("^[0-9a-fA-F:]{2,45}$");
 
     private RequestUtils() {
     }
@@ -31,21 +28,66 @@ public class RequestUtils {
         return "unknown";
     }
 
+    public static String forwardedForHeader(ServerHttpRequest request) {
+        String value = request.getHeaders().getFirst("X-Forwarded-For");
+        return value == null || value.isBlank() ? "none" : value;
+    }
+
     private static String firstValidIp(String headerValue) {
         if (headerValue == null || headerValue.isBlank()) {
             return null;
         }
         for (String part : headerValue.split(",")) {
             String candidate = part.trim();
-            if (isValidIp(candidate)) {
+            if (isLiteralAddress(candidate)) {
                 return candidate;
             }
         }
         return null;
     }
 
-    private static boolean isValidIp(String value) {
-        return IPV4.matcher(value).matches() || IPV6.matcher(value).matches();
+    /**
+     * Literal-only check: never triggers a DNS lookup for junk header values.
+     */
+    private static boolean isLiteralAddress(String value) {
+        try {
+            InetAddress.ofLiteral(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether an address may be used as a blocking identifier.
+     *
+     * <p>Loopback, link-local, site-local (RFC1918) and unique-local addresses are shared by
+     * design — behind the ingress every request can appear to originate from the same node
+     * address. Blocking one of those would lock out every user behind that hop, so such
+     * addresses are never blocked.</p>
+     */
+    public static boolean isBlockableAddress(String ip) {
+        if (ip == null || ip.isBlank()) {
+            return false;
+        }
+        try {
+            InetAddress address = InetAddress.ofLiteral(ip);
+            return !(address.isAnyLocalAddress()
+                    || address.isLoopbackAddress()
+                    || address.isLinkLocalAddress()
+                    || address.isSiteLocalAddress()
+                    || address.isMulticastAddress()
+                    || isUniqueLocalIpv6(address));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private static boolean isUniqueLocalIpv6(InetAddress address) {
+        if (!(address instanceof Inet6Address)) {
+            return false;
+        }
+        return (address.getAddress()[0] & 0xfe) == 0xfc;
     }
 
     public static String extractToken(ServerWebExchange exchange) {
