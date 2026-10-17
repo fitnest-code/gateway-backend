@@ -1,6 +1,7 @@
 package az.fitnest.gateway.util;
 
 import az.fitnest.gateway.exception.ApiError;
+import az.fitnest.gateway.exception.ApiResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -75,7 +76,8 @@ public class ResponseUtils {
 
         byte[] body;
         try {
-            body = OBJECT_MAPPER.writeValueAsBytes(error);
+            // Same envelope as every backend service: {"error": {...}}
+            body = OBJECT_MAPPER.writeValueAsBytes(ApiResponse.error(error));
         } catch (JsonProcessingException e) {
             return response.setComplete();
         }
