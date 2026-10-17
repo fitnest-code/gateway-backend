@@ -36,6 +36,10 @@ class PathValidatorTest {
             // campaign banner dismissal lives under the /me namespace
             "/api/v1/me/subscriptions/campaign-banner/dismiss",
 
+            // --- checkout (order creation + promo quote) ---
+            "/api/v1/checkout",
+            "/api/v1/checkout/quote",
+
             // --- personal endpoints ---
             "/api/v1/me",
             "/api/v2/me",
