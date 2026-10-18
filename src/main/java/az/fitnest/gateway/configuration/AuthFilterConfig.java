@@ -59,8 +59,6 @@ public class AuthFilterConfig {
                     ? jwtProcessor.validateToken(token)
                     : Mono.just(JwtProcessor.TokenValidationResult.rejected(JwtProcessor.RejectionReason.MISSING_TOKEN));
 
-            // switchIfEmpty: a bug in session lookup used to return Mono.empty(), which WebFlux
-            // completes as HTTP 200 with a zero-length body (looked like "no data" everywhere).
             return validationMono.flatMap(validation -> {
                 String identifier = clientIP;
                 if (validation.valid && validation.userId != null) {
@@ -80,7 +78,7 @@ public class AuthFilterConfig {
                             ServerWebExchange forwarded = landingKeyValidator.stripKey(sanitizedExchange);
                             return proceedWithValidationResult(forwarded, chain, path, clientIP, token, validation);
                         });
-            }).switchIfEmpty(ResponseUtils.respondWithUnauthorized(sanitizedExchange));
+            });
         };
     }
 
