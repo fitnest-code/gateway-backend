@@ -114,28 +114,23 @@ public class JwtProcessor {
         String webSessionKey = sessionPrefix + userId + ":web";
         String legacySessionKey = sessionPrefix + userId;
         long now = Instant.now().getEpochSecond();
+        TokenValidationResult ok = TokenValidationResult.authenticated(email, userId, roles, jti, language);
+        TokenValidationResult missing = TokenValidationResult.rejected(RejectionReason.SESSION_NOT_FOUND);
 
-        // Check each category ZSET for the JTI with score > now (valid session)
-        return redisTemplate.opsForZSet().score(mobileSessionKey, jti)
-                .flatMap(mobileScore -> {
-                    if (mobileScore != null && mobileScore > now) {
-                        return Mono.just(TokenValidationResult.authenticated(email, userId, roles, jti, language));
-                    }
-                    return redisTemplate.opsForZSet().score(webSessionKey, jti)
-                            .flatMap(webScore -> {
-                                if (webScore != null && webScore > now) {
-                                    return Mono.just(TokenValidationResult.authenticated(email, userId, roles, jti, language));
-                                }
-                                return redisTemplate.opsForZSet().score(legacySessionKey, jti)
-                                        .map(legacyScore -> {
-                                            if (legacyScore != null && legacyScore > now) {
-                                                return TokenValidationResult.authenticated(email, userId, roles, jti, language);
-                                            }
-                                            return TokenValidationResult.rejected(RejectionReason.SESSION_NOT_FOUND);
-                                        })
-                                        .defaultIfEmpty(TokenValidationResult.rejected(RejectionReason.SESSION_NOT_FOUND));
-                            });
-                });
+        // Reactive ZSET score() is Mono.empty() when the member is absent — NOT Mono.just(null).
+        // Nested flatMap without switchIfEmpty therefore dropped the whole auth filter Mono,
+        // which WebFlux completes as HTTP 200 with an empty body. Web logins store JTIs under
+        // :web, so every authenticated admin/browser call hit that path.
+        return scoreIfActive(mobileSessionKey, jti, now)
+                .switchIfEmpty(scoreIfActive(webSessionKey, jti, now))
+                .switchIfEmpty(scoreIfActive(legacySessionKey, jti, now))
+                .map(ignored -> ok)
+                .defaultIfEmpty(missing);
+    }
+
+    private Mono<Double> scoreIfActive(String key, String jti, long nowEpochSeconds) {
+        return redisTemplate.opsForZSet().score(key, jti)
+                .filter(score -> score != null && score > nowEpochSeconds);
     }
 
     public boolean isAdminRoute(String path) {
