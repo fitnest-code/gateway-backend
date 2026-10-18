@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -112,22 +113,22 @@ public class JwtProcessor {
         String mobileSessionKey = sessionPrefix + userId + ":mobile";
         String webSessionKey = sessionPrefix + userId + ":web";
         String legacySessionKey = sessionPrefix + userId;
+        long now = Instant.now().getEpochSecond();
 
-        return redisTemplate.opsForValue().get(mobileSessionKey)
-                .switchIfEmpty(Mono.just(""))
-                .flatMap(activeMobileJti -> {
-                    if (jti.equals(activeMobileJti)) {
+        // Check each category ZSET for the JTI with score > now (valid session)
+        return redisTemplate.opsForZSet().score(mobileSessionKey, jti)
+                .flatMap(mobileScore -> {
+                    if (mobileScore != null && mobileScore > now) {
                         return Mono.just(TokenValidationResult.authenticated(email, userId, roles, jti, language));
                     }
-                    return redisTemplate.opsForValue().get(webSessionKey)
-                            .switchIfEmpty(Mono.just(""))
-                            .flatMap(activeWebJti -> {
-                                if (jti.equals(activeWebJti)) {
+                    return redisTemplate.opsForZSet().score(webSessionKey, jti)
+                            .flatMap(webScore -> {
+                                if (webScore != null && webScore > now) {
                                     return Mono.just(TokenValidationResult.authenticated(email, userId, roles, jti, language));
                                 }
-                                return redisTemplate.opsForValue().get(legacySessionKey)
-                                        .map(activeLegacyJti -> {
-                                            if (jti.equals(activeLegacyJti)) {
+                                return redisTemplate.opsForZSet().score(legacySessionKey, jti)
+                                        .map(legacyScore -> {
+                                            if (legacyScore != null && legacyScore > now) {
                                                 return TokenValidationResult.authenticated(email, userId, roles, jti, language);
                                             }
                                             return TokenValidationResult.rejected(RejectionReason.SESSION_NOT_FOUND);
