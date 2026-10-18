@@ -4,13 +4,20 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.ReactiveZSetOperations;
 import org.springframework.test.util.ReflectionTestUtils;
+import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Pins the rejection reasons reported for a token.
@@ -92,6 +99,42 @@ class JwtProcessorTest {
         assertThat(result.email).isNull();
         assertThat(result.jti).isNull();
         assertThat(result.rejectionReason).isEqualTo(JwtProcessor.RejectionReason.BLACKLISTED);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void webSessionIsAcceptedWhenMobileZsetScoreIsEmpty() {
+        // Regression: ReactiveZSetOperations.score() returns Mono.empty() when the member is
+        // absent. Nested flatMap skipped :web/:legacy and the auth filter completed empty 200s.
+        ReactiveRedisTemplate<String, String> redis = mock(ReactiveRedisTemplate.class);
+        ReactiveZSetOperations<String, String> zset = mock(ReactiveZSetOperations.class);
+        when(redis.opsForZSet()).thenReturn(zset);
+        when(redis.hasKey(org.mockito.ArgumentMatchers.anyString())).thenReturn(Mono.just(false));
+
+        String jti = "web-jti-1";
+        long future = Instant.now().getEpochSecond() + 3600;
+        when(zset.score(eq("auth:user:session:6:mobile"), eq(jti))).thenReturn(Mono.empty());
+        when(zset.score(eq("auth:user:session:6:web"), eq(jti))).thenReturn(Mono.just((double) future));
+        when(zset.score(eq("auth:user:session:6"), eq(jti))).thenReturn(Mono.empty());
+
+        JwtProcessor withRedis = new JwtProcessor(redis, "auth:user:session:");
+        ReflectionTestUtils.setField(withRedis, "secretKey", SECRET);
+        withRedis.init();
+
+        String token = Jwts.builder()
+                .subject("6")
+                .claim("jti", jti)
+                .claim("email", "admin@fitnest.az")
+                .claim("lang", "AZ")
+                .signWith(key)
+                .compact();
+
+        JwtProcessor.TokenValidationResult result = withRedis.validateToken(token).block();
+
+        assertThat(result).isNotNull();
+        assertThat(result.valid).isTrue();
+        assertThat(result.userId).isEqualTo(6L);
+        assertThat(result.jti).isEqualTo(jti);
     }
 
     private JwtProcessor.RejectionReason reasonOf(String token) {
