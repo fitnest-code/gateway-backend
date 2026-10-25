@@ -10,7 +10,11 @@ public class PathValidator {
             "/payment/abb/init",
             "/payment/abb/installment",
             "/payment/bob/init",
-            "/payment/bob/pay-with-card"
+            "/payment/bob/pay-with-card",
+            // BNPL: init/status/reverse are customer or operator actions.
+            // terms and callback are public (callback is HMAC/Basic secured downstream).
+            "/api/v2/payment/abb/bnpl/init",
+            "/payment/abb/bnpl/init"
     );
 
     private static final Set<String> AUTH_EXEMPT_PATHS = Set.of(
@@ -39,6 +43,13 @@ public class PathValidator {
 
         if (path.startsWith("/api/v1/goals/images/")) {
             return false;
+        }
+
+        boolean bnplStatus = path.startsWith("/api/v2/payment/abb/bnpl/status/");
+        boolean bnplReverse = path.startsWith("/api/v2/payment/abb/bnpl/")
+                && (path.endsWith("/reverse") || path.endsWith("/partial-reverse"));
+        if (bnplStatus || bnplReverse) {
+            return true;
         }
 
         if (path.contains("/admin/") || path.endsWith("/admin") ||
