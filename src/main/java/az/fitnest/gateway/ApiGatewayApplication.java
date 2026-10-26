@@ -313,6 +313,8 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/coins/bulk-welcome-bonus",
                                 "/api/v1/admin/coins/history",
                                 "/api/v2/admin/coins/settings",
+                                "/api/v2/admin/coins/history",
+                                "/api/v2/admin/coins/history/summary",
                                 "/api/v2/admin/coins/earn/preview",
                                 "/api/v2/admin/coins/earn/preview-batch",
                                 "/api/heartbeat",
