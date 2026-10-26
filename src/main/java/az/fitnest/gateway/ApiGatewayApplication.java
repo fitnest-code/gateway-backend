@@ -458,6 +458,7 @@ public class ApiGatewayApplication {
                                 "/api/v1/me/promo",
                                 "/api/v1/me/promo/**",
                                 "/api/v2/me/plan-campaigns",
+                                "/api/v2/me/plan-campaigns/**",
                                 "/api/v2/admin/plan-campaigns",
                                 "/api/v2/admin/plan-campaigns/**",
                                 "/api/v1/checkout",
