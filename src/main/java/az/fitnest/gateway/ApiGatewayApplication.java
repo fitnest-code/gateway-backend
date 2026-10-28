@@ -432,6 +432,7 @@ public class ApiGatewayApplication {
                                 "/api/v1/subscriptions/*/freezes",
                                 "/api/v1/subscriptions/*/home-gym",
                                 "/api/v1/subscriptions/*/home-gym/visits",
+                                "/api/v1/subscriptions/*/home-gym/history",
                                 "/api/v1/admin/gyms/*/home-gym/subscribers",
                                 "/api/v1/freezes/**",
                                 "/api/v1/me/freezes",
