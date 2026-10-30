@@ -60,7 +60,9 @@ public class PathValidator {
                 path.startsWith("/api/v1/checkout") ||
                 path.startsWith("/api/v1/internal/") ||
                 path.startsWith("/api/v1/freezes") ||
-                (path.startsWith("/api/v1/subscriptions/") && path.contains("/freeze"))) {
+                path.startsWith("/api/v1/home-gym") ||
+                (path.startsWith("/api/v1/subscriptions/")
+                        && (path.contains("/freeze") || path.contains("/home-gym")))) {
             return true;
         }
 
