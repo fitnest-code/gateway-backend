@@ -83,6 +83,8 @@ class PathValidatorTest {
             "/api/v1/subscriptions/1/home-gym/history",
             // QR visit history (spec A): successful visits + rejected attempts
             "/api/v1/me/visits/history",
+            // QR visit history (spec A): successful visits + rejected attempts
+            "/api/v1/me/gyms/{gymId}/access-hours",
             // admin home-gym management, guarded by both /admin/ and the home-gym rule
             "/api/v1/admin/gyms/1/home-gym",
             "/api/v1/admin/gyms/1/home-gym/prices",

@@ -63,6 +63,10 @@ class RouteConfigSanityTest {
     private static final List<String> ORDER_VISIT_HISTORY_PATHS = List.of(
             "\"/api/v1/me/visits/history\"");
 
+    /** Access hours per gym (spec P-01/P-02). */
+    private static final List<String> GYM_ACCESS_HOURS_PATHS = List.of(
+            "\"/api/v1/me/gyms/{gymId}/access-hours\"");
+
     private static String source;
 
     @BeforeAll
@@ -111,6 +115,15 @@ class RouteConfigSanityTest {
         for (String path : ORDER_VISIT_HISTORY_PATHS) {
             assertThat(occurrences(source, path))
                     .as("order route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void gatewayRoute_declaresGymAccessHoursExactlyOnce() {
+        for (String path : GYM_ACCESS_HOURS_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("gym access hours route path %s must appear exactly once", path)
                     .isEqualTo(1);
         }
     }
