@@ -74,6 +74,22 @@ class PathValidatorTest {
             "/api/v1/media/delete/1",
             "/api/v1/media/move/1",
 
+            // --- home gym (əsas zal): every v1 home-gym path needs a JWT ---
+            "/api/v1/home-gym",
+            "/api/v1/home-gym/rules",
+            "/api/v1/subscriptions/1/home-gym",
+            "/api/v1/subscriptions/1/home-gym/gyms",
+            "/api/v1/subscriptions/1/home-gym/visits",
+            "/api/v1/subscriptions/1/home-gym/history",
+            // admin home-gym management, guarded by both /admin/ and the home-gym rule
+            "/api/v1/admin/gyms/1/home-gym",
+            "/api/v1/admin/gyms/1/home-gym/prices",
+            "/api/v1/admin/gyms/1/home-gym/time-slots",
+            "/api/v1/admin/gyms/1/home-gym/time-slots/7",
+            "/api/v1/admin/gyms/1/home-gym/subscribers",
+            "/api/v1/admin/subscriptions/1/home-gym/history",
+            "/api/v1/admin/subscriptions/1/home-gym",
+
             // --- any path ending in /admin ---
             "/some/legacy/admin",
     })
@@ -108,9 +124,11 @@ class PathValidatorTest {
             // --- explicit goals-image exemption ---
             "/api/v1/goals/images/123",
 
-            // --- subscriptions without a freeze component ---
+            // --- subscriptions without a freeze or home-gym component ---
             "/api/v1/subscriptions/1/refunds",
             "/api/v1/orders/1",
+            // the home-gym match needs the literal "/home-gym", not an unhyphenated lookalike
+            "/api/v1/subscriptions/1/homegym",
 
             // --- v2 campaigns are NOT covered (see edge-case test) ---
             "/api/v2/campaigns",
@@ -160,6 +178,24 @@ class PathValidatorTest {
         // KNOWN OVER-BROAD MATCH: startsWith("/api/v1/me") also matches
         // "/api/v1/meeting" (no route exists for it today).
         assertThat(PathValidator.requiresAuth("/api/v1/meetings")).isTrue();
+    }
+
+    @Test
+    void requiresAuth_homeGymIsGuardedOnlyOnV1() {
+        // KNOWN GAP: like campaigns, the home-gym rule pins /api/v1 only. No v2
+        // home-gym route exists today; if one is ever added it must also be
+        // added to PathValidator or it will be reachable anonymously.
+        assertThat(PathValidator.requiresAuth("/api/v2/home-gym/rules")).isFalse();
+        assertThat(PathValidator.requiresAuth("/api/v1/home-gym/rules")).isTrue();
+    }
+
+    @Test
+    void requiresAuth_homeGymPrefixMatchIsOverBroad() {
+        // KNOWN OVER-BROAD MATCH: startsWith("/api/v1/home-gym") also matches
+        // "/api/v1/home-gyms" and "/api/v1/home-gymXYZ", which are not routes.
+        // Pinned so tightening the rule later is a deliberate change.
+        assertThat(PathValidator.requiresAuth("/api/v1/home-gyms")).isTrue();
+        assertThat(PathValidator.requiresAuth("/api/v1/home-gymXYZ")).isTrue();
     }
 
     // ---------------------------------------------------------------------

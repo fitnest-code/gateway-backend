@@ -37,6 +37,28 @@ class RouteConfigSanityTest {
             "\"/api/v1/checkout\"",
             "\"/api/v1/checkout/**\"");
 
+    /**
+     * Home-gym paths the catalog-backend route must declare: the customer gym list
+     * and the admin configuration screens (spec 6.1-6.3).
+     */
+    private static final List<String> CATALOG_HOME_GYM_PATHS = List.of(
+            "\"/api/v1/subscriptions/*/home-gym/gyms\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym/prices\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym/time-slots\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym/time-slots/{ruleId}\"");
+
+    /**
+     * Home-gym paths the order-backend route must declare: selection/visits/history,
+     * the catalog rules lookup and the admin subscriber list.
+     */
+    private static final List<String> ORDER_HOME_GYM_PATHS = List.of(
+            "\"/api/v1/subscriptions/*/home-gym\"",
+            "\"/api/v1/subscriptions/*/home-gym/visits\"",
+            "\"/api/v1/subscriptions/*/home-gym/history\"",
+            "\"/api/v1/home-gym/rules\"",
+            "\"/api/v1/admin/gyms/*/home-gym/subscribers\"");
+
     private static String source;
 
     @BeforeAll
@@ -60,6 +82,40 @@ class RouteConfigSanityTest {
                     .as("route path %s must appear exactly once", path)
                     .isEqualTo(1);
         }
+    }
+
+    @Test
+    void catalogBackendRoute_declaresEachHomeGymPathExactlyOnce() {
+        for (String path : CATALOG_HOME_GYM_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("catalog route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void orderBackendRoute_declaresEachHomeGymPathExactlyOnce() {
+        for (String path : ORDER_HOME_GYM_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("order route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void customerHomeGymGymListIsDeclaredBeforeTheBroaderOrderRoute() {
+        // Spring Cloud Gateway keeps declaration order as the tie-breaker for equally
+        // ordered routes. The customer gym list is served by catalog while the rest of
+        // /subscriptions/*/home-gym is served by order; keeping the catalog route first
+        // makes the split explicit and survives an order route that widens its pattern.
+        int catalogList = source.indexOf("\"/api/v1/subscriptions/*/home-gym/gyms\"");
+        int orderSelection = source.indexOf("\"/api/v1/subscriptions/*/home-gym\"");
+        int orderBlock = source.indexOf(".route(\"order-backend\"");
+
+        assertThat(catalogList).isNotNegative();
+        assertThat(orderSelection).isNotNegative();
+        assertThat(catalogList).isLessThan(orderSelection);
+        assertThat(catalogList).isLessThan(orderBlock);
     }
 
     @Test
