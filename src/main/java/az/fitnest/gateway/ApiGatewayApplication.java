@@ -427,6 +427,7 @@ public class ApiGatewayApplication {
                                 "/api/v1/me/subscriptions/**",
                                 "/api/v2/me/subscriptions/**",
                                 "/api/v3/me/subscriptions/**",
+                                "/api/v1/me/visits/history",
                                 "/api/v1/subscriptions/*/freeze",
                                 "/api/v1/subscriptions/*/freeze/**",
                                 "/api/v1/subscriptions/*/freezes",

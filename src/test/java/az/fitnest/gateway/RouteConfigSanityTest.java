@@ -59,6 +59,10 @@ class RouteConfigSanityTest {
             "\"/api/v1/home-gym/rules\"",
             "\"/api/v1/admin/gyms/*/home-gym/subscribers\"");
 
+    /** All-subscriber QR visit history (spec A) served by order-backend. */
+    private static final List<String> ORDER_VISIT_HISTORY_PATHS = List.of(
+            "\"/api/v1/me/visits/history\"");
+
     private static String source;
 
     @BeforeAll
@@ -96,6 +100,15 @@ class RouteConfigSanityTest {
     @Test
     void orderBackendRoute_declaresEachHomeGymPathExactlyOnce() {
         for (String path : ORDER_HOME_GYM_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("order route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void orderBackendRoute_declaresVisitHistoryExactlyOnce() {
+        for (String path : ORDER_VISIT_HISTORY_PATHS) {
             assertThat(occurrences(source, path))
                     .as("order route path %s must appear exactly once", path)
                     .isEqualTo(1);
