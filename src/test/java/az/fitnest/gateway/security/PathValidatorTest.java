@@ -134,9 +134,6 @@ class PathValidatorTest {
             // the home-gym match needs the literal "/home-gym", not an unhyphenated lookalike
             "/api/v1/subscriptions/1/homegym",
 
-            // --- v2 campaigns are NOT covered (see edge-case test) ---
-            "/api/v2/campaigns",
-
             // --- near-miss of the admin rule: "/admins" has no trailing slash
             //     and therefore does not contain "/admin/" nor end in "/admin"
             "/api/v1/admins",
@@ -160,12 +157,9 @@ class PathValidatorTest {
     }
 
     @Test
-    void requiresAuth_campaignsAreOnlyProtectedOnV1() {
-        // KNOWN GAP: only /api/v1/campaigns is guarded; the gateway route
-        // config also only declares v1 campaign paths, so today nothing can
-        // reach /api/v2/campaigns — but if such a route is ever added it will
-        // be public until PathValidator is updated too.
-        assertThat(PathValidator.requiresAuth("/api/v2/campaigns")).isFalse();
+    void requiresAuth_campaignDetailRequiresAuthOnV1AndV2() {
+        assertThat(PathValidator.requiresAuth("/api/v2/campaigns")).isTrue();
+        assertThat(PathValidator.requiresAuth("/api/v2/campaigns/87")).isTrue();
         assertThat(PathValidator.requiresAuth("/api/v1/campaigns")).isTrue();
     }
 
