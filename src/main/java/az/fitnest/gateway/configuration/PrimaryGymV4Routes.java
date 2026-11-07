@@ -16,6 +16,8 @@ public class PrimaryGymV4Routes {
                 r.path(
                         "/api/v4/admin/gyms/*/primary-subscribers",
                         "/api/v4/admin/gyms/*/membership-policy",
+                        // Pre-purchase home-gym gym detail (homeGym + per-package flags).
+                        "/api/v4/gyms/*",
                         "/api/v4/gyms/*/membership-quote",
                         "/api/v4/gyms/entrance/scan")
                     .uri("http://catalog-backend:8080"))

@@ -49,6 +49,14 @@ class RouteConfigSanityTest {
             "\"/api/v1/admin/gyms/{gymId}/home-gym/time-slots/{ruleId}\"");
 
     /**
+     * Pre-purchase home-gym read-only endpoints (Qayda screens 10.x) served by catalog.
+     */
+    private static final List<String> CATALOG_PRE_PURCHASE_HOME_GYM_PATHS = List.of(
+            "\"/api/v3/gyms\"",
+            "\"/api/v4/gyms/{gymId}\"",
+            "\"/api/v2/gyms/count/by-category\"");
+
+    /**
      * Home-gym paths the order-backend route must declare: selection/visits/history,
      * the catalog rules lookup and the admin subscriber list.
      */
@@ -97,6 +105,15 @@ class RouteConfigSanityTest {
         for (String path : CATALOG_HOME_GYM_PATHS) {
             assertThat(occurrences(source, path))
                     .as("catalog route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void catalogBackendRoute_declaresPrePurchaseHomeGymPathsExactlyOnce() {
+        for (String path : CATALOG_PRE_PURCHASE_HOME_GYM_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("catalog pre-purchase home-gym path %s must appear exactly once", path)
                     .isEqualTo(1);
         }
     }

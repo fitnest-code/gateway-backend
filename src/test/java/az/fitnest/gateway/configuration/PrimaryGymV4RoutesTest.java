@@ -32,6 +32,9 @@ class PrimaryGymV4RoutesTest {
           "http://catalog-backend:8080",
           owner(routes, "/api/v4/admin/gyms/10/primary-subscribers"));
       assertEquals("http://catalog-backend:8080", owner(routes, "/api/v4/gyms/entrance/scan"));
+      assertEquals("http://catalog-backend:8080", owner(routes, "/api/v4/gyms/42"));
+      assertEquals(
+          "http://catalog-backend:8080", owner(routes, "/api/v4/gyms/42/membership-quote"));
       assertEquals(
           "http://order-backend:8080", owner(routes, "/api/v4/me/subscriptions/primary-gym"));
       assertNull(owner(routes, "/api/v4/internal/primary-gym/check-ins"));

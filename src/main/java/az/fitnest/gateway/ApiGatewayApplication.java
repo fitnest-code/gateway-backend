@@ -118,7 +118,11 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/gyms",
                                 "/api/v2/gyms",
                                 "/api/v2/gyms/{gymId}",
+                                // Pre-purchase home-gym read-only (Nijat Nov 2026): list + search categories.
+                                "/api/v3/gyms",
                                 "/api/v3/gyms/{gymId}",
+                                "/api/v4/gyms/{gymId}",
+                                "/api/v2/gyms/count/by-category",
                                 "/api/v2/admin/gyms/step1",
                                 "/api/v2/admin/gyms/validate/step1",
                                 "/api/v2/admin/gyms/{id}/step5",
