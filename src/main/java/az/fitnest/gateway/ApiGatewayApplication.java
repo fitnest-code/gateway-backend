@@ -282,6 +282,8 @@ public class ApiGatewayApplication {
                                         "/api/v1/admin/notifications/bulk",
                                         "/api/v1/admin/notifications/sms/bulk",
                                         "/api/v1/admin/notifications/email/bulk",
+                                        // Black Friday localized push trigger (ops/cron)
+                                        "/api/v2/admin/notifications/black-friday/push",
                                         "/api/v1/admin/devices",
                                         "/api/v1/admin/devices/user/{userId}",
                                         "/api/v1/admin/devices/send",
@@ -430,9 +432,13 @@ public class ApiGatewayApplication {
                                 "/api/v1/subscription-packages/**",
                                 "/api/v3/subscription-packages",
                                 "/api/v3/subscription-packages/**",
+                                // Black Friday pricing catalog (v4) — separate from v1/v3 DTOs
+                                "/api/v4/subscription-packages",
+                                "/api/v4/subscription-packages/**",
                                 "/api/v1/me/subscriptions/**",
                                 "/api/v2/me/subscriptions/**",
                                 "/api/v3/me/subscriptions/**",
+                                "/api/v2/me/subscription-home-state",
                                 "/api/v1/me/visits/history",
                                 "/api/v1/subscriptions/*/freeze",
                                 "/api/v1/subscriptions/*/freeze/**",
@@ -467,6 +473,8 @@ public class ApiGatewayApplication {
                                 "/api/v1/campaigns",
                                 "/api/v1/campaigns/**",
                                 "/api/v2/campaigns/{id}",
+                                // Black Friday active pricing campaign (not October bonus /api/v1/campaigns)
+                                "/api/v2/campaigns/active",
                                 "/api/v2/admin/campaigns/{id}/push",
                                 "/api/v1/admin/campaigns",
                                 "/api/v1/admin/campaigns/**",
@@ -474,6 +482,8 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/promo-campaigns/**",
                                 "/api/v1/admin/promo-partners",
                                 "/api/v1/admin/promo-partners/**",
+                                "/api/v2/admin/pricing-campaigns",
+                                "/api/v2/admin/pricing-campaigns/**",
                                 "/api/v1/me/promo",
                                 "/api/v1/me/promo/**",
                                 "/api/v2/me/plan-campaigns",
@@ -482,6 +492,8 @@ public class ApiGatewayApplication {
                                 "/api/v2/admin/plan-campaigns/**",
                                 "/api/v1/checkout",
                                 "/api/v1/checkout/**",
+                                "/api/v2/checkout",
+                                "/api/v2/checkout/**",
                                 "/admin/subscription/**").uri("http://order-backend:8080"))
  
                         .route("user-backend", r -> r.path(
