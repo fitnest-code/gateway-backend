@@ -285,6 +285,8 @@ public class ApiGatewayApplication {
                                 "/api/v1/me/payments/history",
                                 "/api/v1/me/payments/history/{transactionId}",
                                 "/api/v1/me/payments/order/{orderId}",
+                                // v2 poll returns status + transactionId for receipt lookup
+                                "/api/v2/me/payments/order/{orderId}",
                                 "/api/v1/me/cards/default",
                                 "/api/v1/me/cards/{cardId}",
                                 "/api/v1/me/cards",
