@@ -37,6 +37,44 @@ class RouteConfigSanityTest {
             "\"/api/v1/checkout\"",
             "\"/api/v1/checkout/**\"");
 
+    /**
+     * Home-gym paths the catalog-backend route must declare: the customer gym list
+     * and the admin configuration screens (spec 6.1-6.3).
+     */
+    private static final List<String> CATALOG_HOME_GYM_PATHS = List.of(
+            "\"/api/v1/subscriptions/*/home-gym/gyms\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym/prices\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym/time-slots\"",
+            "\"/api/v1/admin/gyms/{gymId}/home-gym/time-slots/{ruleId}\"");
+
+    /**
+     * Pre-purchase home-gym read-only endpoints (Qayda screens 10.x) served by catalog.
+     */
+    private static final List<String> CATALOG_PRE_PURCHASE_HOME_GYM_PATHS = List.of(
+            "\"/api/v3/gyms\"",
+            "\"/api/v4/gyms/{gymId}\"",
+            "\"/api/v2/gyms/count/by-category\"");
+
+    /**
+     * Home-gym paths the order-backend route must declare: selection/visits/history,
+     * the catalog rules lookup and the admin subscriber list.
+     */
+    private static final List<String> ORDER_HOME_GYM_PATHS = List.of(
+            "\"/api/v1/subscriptions/*/home-gym\"",
+            "\"/api/v1/subscriptions/*/home-gym/visits\"",
+            "\"/api/v1/subscriptions/*/home-gym/history\"",
+            "\"/api/v1/home-gym/rules\"",
+            "\"/api/v1/admin/gyms/*/home-gym/subscribers\"");
+
+    /** All-subscriber QR visit history (spec A) served by order-backend. */
+    private static final List<String> ORDER_VISIT_HISTORY_PATHS = List.of(
+            "\"/api/v1/me/visits/history\"");
+
+    /** Access hours per gym (spec P-01/P-02). */
+    private static final List<String> GYM_ACCESS_HOURS_PATHS = List.of(
+            "\"/api/v1/me/gyms/{gymId}/access-hours\"");
+
     private static String source;
 
     @BeforeAll
@@ -60,6 +98,67 @@ class RouteConfigSanityTest {
                     .as("route path %s must appear exactly once", path)
                     .isEqualTo(1);
         }
+    }
+
+    @Test
+    void catalogBackendRoute_declaresEachHomeGymPathExactlyOnce() {
+        for (String path : CATALOG_HOME_GYM_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("catalog route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void catalogBackendRoute_declaresPrePurchaseHomeGymPathsExactlyOnce() {
+        for (String path : CATALOG_PRE_PURCHASE_HOME_GYM_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("catalog pre-purchase home-gym path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void orderBackendRoute_declaresEachHomeGymPathExactlyOnce() {
+        for (String path : ORDER_HOME_GYM_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("order route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void orderBackendRoute_declaresVisitHistoryExactlyOnce() {
+        for (String path : ORDER_VISIT_HISTORY_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("order route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void gatewayRoute_declaresGymAccessHoursExactlyOnce() {
+        for (String path : GYM_ACCESS_HOURS_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("gym access hours route path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void customerHomeGymGymListIsDeclaredBeforeTheBroaderOrderRoute() {
+        // Spring Cloud Gateway keeps declaration order as the tie-breaker for equally
+        // ordered routes. The customer gym list is served by catalog while the rest of
+        // /subscriptions/*/home-gym is served by order; keeping the catalog route first
+        // makes the split explicit and survives an order route that widens its pattern.
+        int catalogList = source.indexOf("\"/api/v1/subscriptions/*/home-gym/gyms\"");
+        int orderSelection = source.indexOf("\"/api/v1/subscriptions/*/home-gym\"");
+        int orderBlock = source.indexOf(".route(\"order-backend\"");
+
+        assertThat(catalogList).isNotNegative();
+        assertThat(orderSelection).isNotNegative();
+        assertThat(catalogList).isLessThan(orderSelection);
+        assertThat(catalogList).isLessThan(orderBlock);
     }
 
     @Test
