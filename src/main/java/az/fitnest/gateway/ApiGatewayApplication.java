@@ -477,6 +477,8 @@ public class ApiGatewayApplication {
                                 "/api/v2/campaigns/{id}",
                                 // Black Friday active pricing campaign (not October bonus /api/v1/campaigns)
                                 "/api/v2/campaigns/active",
+                                // BF intro screen payload (copy + options in one call); exact path like /active
+                                "/api/v2/campaigns/active/landing",
                                 "/api/v2/admin/campaigns/{id}/push",
                                 "/api/v1/admin/campaigns",
                                 "/api/v1/admin/campaigns/**",
