@@ -494,6 +494,9 @@ public class ApiGatewayApplication {
                                 "/api/v1/checkout/**",
                                 "/api/v2/checkout",
                                 "/api/v2/checkout/**",
+                                // v3 = multi-rail (Epoint/ABB/BOB) create; v2 stays Epoint-only for old clients.
+                                "/api/v3/checkout",
+                                "/api/v3/checkout/**",
                                 "/admin/subscription/**").uri("http://order-backend:8080"))
  
                         .route("user-backend", r -> r.path(
