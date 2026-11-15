@@ -160,6 +160,7 @@ class PathValidatorTest {
     void requiresAuth_campaignDetailRequiresAuthOnV1AndV2() {
         assertThat(PathValidator.requiresAuth("/api/v2/campaigns")).isTrue();
         assertThat(PathValidator.requiresAuth("/api/v2/campaigns/87")).isTrue();
+        assertThat(PathValidator.requiresAuth("/api/v2/campaigns/active/landing")).isTrue();
         assertThat(PathValidator.requiresAuth("/api/v1/campaigns")).isTrue();
     }
 
