@@ -22,7 +22,8 @@ public class LandingKeyValidator {
     }
 
     public static boolean isProtectedLandingPath(String path, String method) {
-        if (path == null || !path.startsWith("/api/v1/public/landing/")) {
+        if (path == null
+                || !(path.startsWith("/api/v1/public/landing/") || path.startsWith("/api/v2/public/landing/"))) {
             return false;
         }
         return !(isRead(method) && isPublicLandingAsset(path));
@@ -37,6 +38,20 @@ public class LandingKeyValidator {
             return true;
         }
 
+        return hasValidLandingKey(exchange);
+    }
+
+    /**
+     * True only when the landing key is configured <em>and</em> this request presents it.
+     * Used to skip rate limits for our SSR/proxy host without opening unlimited access to random curls.
+     * Returns false when the key is not enforced (so unauthenticated traffic stays rate-limited).
+     */
+    public boolean hasValidLandingKey(ServerWebExchange exchange) {
+        if (!config.isEnforced()) {
+            return false;
+        }
+
+        ServerHttpRequest request = exchange.getRequest();
         if (hasKeyInQuery(request)) {
             return false;
         }

@@ -65,8 +65,15 @@ public class AuthFilterConfig {
                     identifier = "user:" + validation.userId;
                 }
 
-                return rateLimiter.checkRateLimit(identifier, path, method)
-                        .flatMap(result -> {
+                // Trusted landing host (valid X-FitNest-Landing-Key) skips GET rate limits.
+                // Random curls without the key stay rate-limited, then 403 when the key is enforced.
+                boolean trustedLandingHost = landingKeyValidator.hasValidLandingKey(sanitizedExchange);
+                boolean skipRateLimit = trustedLandingHost && "GET".equals(method);
+                Mono<Long> rateLimitMono = skipRateLimit
+                        ? Mono.just(0L)
+                        : rateLimiter.checkRateLimit(identifier, path, method);
+
+                return rateLimitMono.flatMap(result -> {
                             if (result == -1) {
                                 return ResponseUtils.respondWithTooManyRequests(sanitizedExchange);
                             }
