@@ -61,7 +61,10 @@ public class RateLimitConfig {
         } else if (path.startsWith("/api/v1/public/landing/media/")
                 || path.startsWith("/api/v1/public/landing/goals/images/")) {
             return "LANDING_MEDIA_GET";
-        } else if (path.startsWith("/api/v1/public/landing/") || path.equals("/api/v1/goals") || path.startsWith("/api/v1/goals/")) {
+        } else if (path.startsWith("/api/v1/public/landing/")
+                || path.startsWith("/api/v2/public/landing/")
+                || path.equals("/api/v1/goals")
+                || path.startsWith("/api/v1/goals/")) {
             return "LANDING_GET";
         } else if (path.startsWith("/api/v1/media/")) {
             return "MEDIA_GET";
@@ -116,7 +119,10 @@ public class RateLimitConfig {
                 || path.startsWith("/api/v1/public/landing/goals/images/")) {
             return "landing.media.get";
         }
-        if (path.startsWith("/api/v1/public/landing/") || path.equals("/api/v1/goals") || path.startsWith("/api/v1/goals/")) {
+        if (path.startsWith("/api/v1/public/landing/")
+                || path.startsWith("/api/v2/public/landing/")
+                || path.equals("/api/v1/goals")
+                || path.startsWith("/api/v1/goals/")) {
             return "landing.read";
         }
         if (isRead) {
