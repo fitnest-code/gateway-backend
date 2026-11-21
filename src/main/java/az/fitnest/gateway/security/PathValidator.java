@@ -11,6 +11,8 @@ public class PathValidator {
             "/payment/abb/installment",
             "/payment/bob/init",
             "/payment/bob/pay-with-card",
+            "/payment/kapital/init",
+            "/api/v2/payment/kapital/init",
             // BNPL: init/status/reverse are customer or operator actions.
             // terms and callback are public (callback is HMAC/Basic secured downstream).
             "/api/v2/payment/abb/bnpl/init",

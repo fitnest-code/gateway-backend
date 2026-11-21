@@ -352,6 +352,7 @@ public class ApiGatewayApplication {
                                 "/api/v2/payment/abb/installment",
                                 "/api/v2/payment/bob/init",
                                 "/api/v2/payment/bob/pay-with-card",
+                                "/api/v2/payment/kapital/init",
                                 "/api/v2/payment/abb/bnpl/init",
                                 "/api/v2/payment/abb/bnpl/terms",
                                 "/api/v2/payment/abb/bnpl/terms/detail",
@@ -398,6 +399,8 @@ public class ApiGatewayApplication {
                                 "/payment/abb/action/status/{orderId}",
                                 "/payment/abb/**",
                                 "/payment/bob/**",
+                                "/payment/kapital/**",
+                                "/api/v1/payments/kapital/result",
                                 "/payment/redirect/**",
                                 "/payment/heartbeat",
                                 "/.well-known/jwks.json",
@@ -502,6 +505,9 @@ public class ApiGatewayApplication {
                                 // v3 = multi-rail (Epoint/ABB/BOB) create; v2 stays Epoint-only for old clients.
                                 "/api/v3/checkout",
                                 "/api/v3/checkout/**",
+                                // v4 = v3 + Kapital Bank (card / Taksit); leave v3 frozen.
+                                "/api/v4/checkout",
+                                "/api/v4/checkout/**",
                                 "/admin/subscription/**").uri("http://order-backend:8080"))
  
                         .route("user-backend", r -> r.path(

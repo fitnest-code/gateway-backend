@@ -68,6 +68,8 @@ class PathValidatorTest {
             "/payment/abb/installment",
             "/payment/bob/init",
             "/payment/bob/pay-with-card",
+            "/payment/kapital/init",
+            "/api/v2/payment/kapital/init",
 
             // --- media upload/delete/move ---
             "/api/v1/media/upload",
