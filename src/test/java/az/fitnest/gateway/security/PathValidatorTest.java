@@ -44,6 +44,8 @@ class PathValidatorTest {
             "/api/v1/me",
             "/api/v2/me",
             "/api/v3/me",
+            "/api/v4/me/subscriptions/active",
+            "/api/v4/me/subscriptions/primary-gym",
 
             // --- freezes / subscriptions ---
             "/api/v1/freezes",
@@ -168,9 +170,9 @@ class PathValidatorTest {
 
     @Test
     void requiresAuth_meEndpointsAreCoveredOnlyUpToV3() {
-        // /api/v1/me, /api/v2/me and /api/v3/me are guarded; a hypothetical
-        // /api/v4/me would silently be public.
+        // /api/v1/me, /api/v2/me and /api/v3/me are guarded; v4/me/subscriptions/* too.
         assertThat(PathValidator.requiresAuth("/api/v4/me")).isFalse();
+        assertThat(PathValidator.requiresAuth("/api/v4/me/subscriptions/active")).isTrue();
         assertThat(PathValidator.requiresAuth("/api/v3/me")).isTrue();
     }
 

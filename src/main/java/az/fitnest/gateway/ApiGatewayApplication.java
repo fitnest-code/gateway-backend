@@ -444,6 +444,7 @@ public class ApiGatewayApplication {
                                 "/api/v1/me/subscriptions/**",
                                 "/api/v2/me/subscriptions/**",
                                 "/api/v3/me/subscriptions/**",
+                                "/api/v4/me/subscriptions/active",
                                 "/api/v2/me/subscription-home-state",
                                 "/api/v1/me/visits/history",
                                 "/api/v1/subscriptions/*/freeze",

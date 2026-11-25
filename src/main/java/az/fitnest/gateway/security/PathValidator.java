@@ -54,6 +54,10 @@ public class PathValidator {
             return true;
         }
 
+        if (path.startsWith("/api/v4/me/subscriptions")) {
+            return true;
+        }
+
         if (path.contains("/admin/") || path.endsWith("/admin") ||
                 path.startsWith("/api/v1/me") || path.startsWith("/api/v2/me") ||
                 path.startsWith("/api/v3/me") ||
