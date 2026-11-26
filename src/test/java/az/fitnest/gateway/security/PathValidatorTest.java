@@ -47,6 +47,11 @@ class PathValidatorTest {
             "/api/v4/me/subscriptions/active",
             "/api/v4/me/subscriptions/primary-gym",
 
+            // --- primary QR entrance (catalog) ---
+            "/api/v5/gyms/entrance/primary-scan",
+            "/api/v5/gyms/entrance/scan",
+            "/api/v6/gyms/entrance/primary-scan",
+
             // --- freezes / subscriptions ---
             "/api/v1/freezes",
             "/api/v1/subscriptions/1/freezes",

@@ -58,6 +58,12 @@ public class PathValidator {
             return true;
         }
 
+        // Mobile primary entrance (v5/v6) needs a user; catalog rejects anonymous too.
+        if (path.startsWith("/api/v5/gyms/entrance/")
+                || path.startsWith("/api/v6/gyms/entrance/")) {
+            return true;
+        }
+
         if (path.contains("/admin/") || path.endsWith("/admin") ||
                 path.startsWith("/api/v1/me") || path.startsWith("/api/v2/me") ||
                 path.startsWith("/api/v3/me") ||
