@@ -311,6 +311,9 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/payments/order/{orderId}",
                                 "/api/v1/admin/payments/transaction/{transactionId}",
                                 "/api/v1/admin/payments/user/{userId}/history",
+                                // Kapital Böl ödə (manual BNPL applications) — admin
+                                "/api/v1/admin/bol-ode",
+                                "/api/v1/admin/bol-ode/**",
                                 "/api/v1/coins/wallet",
                                 "/api/v1/coins/terms",
                                 "/api/v1/coins/history",
@@ -353,6 +356,8 @@ public class ApiGatewayApplication {
                                 "/api/v2/payment/bob/init",
                                 "/api/v2/payment/bob/pay-with-card",
                                 "/api/v2/payment/kapital/init",
+                                // Kapital Böl ödə (not Taksit / not ABB BNPL)
+                                "/api/v2/payment/kapital/bol-ode/**",
                                 "/api/v2/payment/abb/bnpl/init",
                                 "/api/v2/payment/abb/bnpl/terms",
                                 "/api/v2/payment/abb/bnpl/terms/detail",
