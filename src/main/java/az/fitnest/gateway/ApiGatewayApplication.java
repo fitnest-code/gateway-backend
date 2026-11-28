@@ -448,9 +448,10 @@ public class ApiGatewayApplication {
 
                         .route("order-backend", r -> r.path(
                                 "/api/v1/admin/reports/subscriptions",
-                                // Dashboard V2 — subscription summary / lists / export
+                                // Dashboard V2 — subscription summary / lists / export / home-gym counts
                                 "/api/v1/admin/dashboard/subscriptions",
                                 "/api/v1/admin/dashboard/subscriptions/**",
+                                "/api/v1/admin/dashboard/home-gym-counts",
                                 "/api/v1/subscription-packages/**",
                                 "/api/v3/subscription-packages",
                                 "/api/v3/subscription-packages/**",
