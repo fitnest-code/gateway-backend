@@ -140,6 +140,13 @@ public class ApiGatewayApplication {
                                 "/api/v2/admin/gyms/{id}/details",
                                 "/api/v2/admin/gyms/{id}/trainers",
                                 "/api/v2/admin/gyms/create-complete",
+                                // V3 gym wizard: AZ/EN/RU free text (catalog-backend).
+                                "/api/v3/admin/gyms/step1",
+                                "/api/v3/admin/gyms/validate/step1",
+                                "/api/v3/admin/gyms/{id}/step6",
+                                "/api/v3/admin/gyms/validate/step6",
+                                "/api/v3/admin/gyms/{id}/subscriptions",
+                                "/api/v3/admin/gyms/create-complete",
                                 "/api/v1/admin/gyms/step1",
                                 "/api/v1/admin/gyms/create-complete",
                                 "/api/v1/admin/gyms/{id}/step2",
