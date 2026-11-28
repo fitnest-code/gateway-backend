@@ -62,6 +62,17 @@ class PathValidatorTest {
             "/api/v1/admin/anything",
             "/admin/subscription/x",
 
+            // --- admin gym wizard: v1/v2 regression + new v3 localized paths ---
+            "/api/v1/admin/gyms/step1",
+            "/api/v2/admin/gyms/step1",
+            "/api/v2/admin/gyms/create-complete",
+            "/api/v3/admin/gyms/step1",
+            "/api/v3/admin/gyms/validate/step1",
+            "/api/v3/admin/gyms/42/step6",
+            "/api/v3/admin/gyms/validate/step6",
+            "/api/v3/admin/gyms/42/subscriptions",
+            "/api/v3/admin/gyms/create-complete",
+
             // --- versioned subscription packages ---
             "/api/v3/subscription-packages",
             "/api/v3/subscription-packages/1",

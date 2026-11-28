@@ -56,6 +56,15 @@ class RouteConfigSanityTest {
             "\"/api/v4/gyms/{gymId}\"",
             "\"/api/v2/gyms/count/by-category\"");
 
+    /** V3 gym wizard paths (AZ/EN/RU free text) the catalog-backend route must declare. */
+    private static final List<String> CATALOG_ADMIN_GYM_V3_PATHS = List.of(
+            "\"/api/v3/admin/gyms/step1\"",
+            "\"/api/v3/admin/gyms/validate/step1\"",
+            "\"/api/v3/admin/gyms/{id}/step6\"",
+            "\"/api/v3/admin/gyms/validate/step6\"",
+            "\"/api/v3/admin/gyms/{id}/subscriptions\"",
+            "\"/api/v3/admin/gyms/create-complete\"");
+
     /**
      * Home-gym paths the order-backend route must declare: selection/visits/history,
      * the catalog rules lookup and the admin subscriber list.
@@ -114,6 +123,15 @@ class RouteConfigSanityTest {
         for (String path : CATALOG_PRE_PURCHASE_HOME_GYM_PATHS) {
             assertThat(occurrences(source, path))
                     .as("catalog pre-purchase home-gym path %s must appear exactly once", path)
+                    .isEqualTo(1);
+        }
+    }
+
+    @Test
+    void catalogBackendRoute_declaresAdminGymV3PathsExactlyOnce() {
+        for (String path : CATALOG_ADMIN_GYM_V3_PATHS) {
+            assertThat(occurrences(source, path))
+                    .as("catalog v3 admin gym route path %s must appear exactly once", path)
                     .isEqualTo(1);
         }
     }
