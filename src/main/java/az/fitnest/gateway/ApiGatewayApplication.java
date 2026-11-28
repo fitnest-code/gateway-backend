@@ -101,9 +101,10 @@ public class ApiGatewayApplication {
                                 "/api/v1/public/landing/media/{fileId}",
                                 "/api/v1/admin/reports/qr-scans",
                                 "/api/v1/admin/reports/gym-payments",
-                                // Dashboard V2 — gym obligations / top gyms
+                                // Dashboard V2 — gym obligations / top gyms / QR sparkline
                                 "/api/v1/admin/dashboard/gym-obligations",
                                 "/api/v1/admin/dashboard/top-gyms",
+                                "/api/v1/admin/dashboard/qr-sparkline",
                                 "/api/v1/admin/stores",
                                 "/api/v1/admin/stores/{id}",
                                 "/api/v1/admin/stores/step1",
