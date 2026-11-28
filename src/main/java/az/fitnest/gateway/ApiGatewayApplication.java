@@ -311,6 +311,9 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/payments/order/{orderId}",
                                 "/api/v1/admin/payments/transaction/{transactionId}",
                                 "/api/v1/admin/payments/user/{userId}/history",
+                                // Kapital Böl ödə (manual BNPL applications) — admin
+                                "/api/v1/admin/bol-ode",
+                                "/api/v1/admin/bol-ode/**",
                                 "/api/v1/coins/wallet",
                                 "/api/v1/coins/terms",
                                 "/api/v1/coins/history",
@@ -354,6 +357,10 @@ public class ApiGatewayApplication {
                                 "/api/v2/payment/abb/installment",
                                 "/api/v2/payment/bob/init",
                                 "/api/v2/payment/bob/pay-with-card",
+                                "/api/v2/payment/kapital/init",
+                                "/api/v2/payment/kapital/installment",
+                                // Kapital Böl ödə (not Taksit / not ABB BNPL)
+                                "/api/v2/payment/kapital/bol-ode/**",
                                 "/api/v2/payment/abb/bnpl/init",
                                 "/api/v2/payment/abb/bnpl/terms",
                                 "/api/v2/payment/abb/bnpl/terms/detail",
@@ -400,6 +407,8 @@ public class ApiGatewayApplication {
                                 "/payment/abb/action/status/{orderId}",
                                 "/payment/abb/**",
                                 "/payment/bob/**",
+                                "/payment/kapital/**",
+                                "/api/v1/payments/kapital/result",
                                 "/payment/redirect/**",
                                 "/payment/heartbeat",
                                 "/.well-known/jwks.json",
@@ -443,6 +452,7 @@ public class ApiGatewayApplication {
                                 "/api/v1/me/subscriptions/**",
                                 "/api/v2/me/subscriptions/**",
                                 "/api/v3/me/subscriptions/**",
+                                "/api/v4/me/subscriptions/active",
                                 "/api/v2/me/subscription-home-state",
                                 "/api/v1/me/visits/history",
                                 "/api/v1/subscriptions/*/freeze",
@@ -504,6 +514,9 @@ public class ApiGatewayApplication {
                                 // v3 = multi-rail (Epoint/ABB/BOB) create; v2 stays Epoint-only for old clients.
                                 "/api/v3/checkout",
                                 "/api/v3/checkout/**",
+                                // v4 = v3 + Kapital Bank (card / Taksit); leave v3 frozen.
+                                "/api/v4/checkout",
+                                "/api/v4/checkout/**",
                                 "/admin/subscription/**").uri("http://order-backend:8080"))
  
                         .route("user-backend", r -> r.path(
