@@ -356,6 +356,7 @@ public class ApiGatewayApplication {
                                 "/api/v2/payment/bob/init",
                                 "/api/v2/payment/bob/pay-with-card",
                                 "/api/v2/payment/kapital/init",
+                                "/api/v2/payment/kapital/installment",
                                 // Kapital Böl ödə (not Taksit / not ABB BNPL)
                                 "/api/v2/payment/kapital/bol-ode/**",
                                 "/api/v2/payment/abb/bnpl/init",
