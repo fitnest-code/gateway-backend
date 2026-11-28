@@ -101,6 +101,9 @@ public class ApiGatewayApplication {
                                 "/api/v1/public/landing/media/{fileId}",
                                 "/api/v1/admin/reports/qr-scans",
                                 "/api/v1/admin/reports/gym-payments",
+                                // Dashboard V2 — gym obligations / top gyms
+                                "/api/v1/admin/dashboard/gym-obligations",
+                                "/api/v1/admin/dashboard/top-gyms",
                                 "/api/v1/admin/stores",
                                 "/api/v1/admin/stores/{id}",
                                 "/api/v1/admin/stores/step1",
@@ -296,6 +299,8 @@ public class ApiGatewayApplication {
                         .route("payment-backend", r -> r.path(
                                 "/api/v1/admin/reports/income",
                                 "/api/v1/admin/reports/analytics",
+                                // Dashboard V2 — payment income (parallel API; does not replace /reports/income)
+                                "/api/v1/admin/dashboard/income-summary",
                                 "/api/v1/admin/transfers/request",
                                 "/api/v1/admin/transfers/history",
                                 "/api/v1/me/payments/history",
@@ -441,6 +446,9 @@ public class ApiGatewayApplication {
 
                         .route("order-backend", r -> r.path(
                                 "/api/v1/admin/reports/subscriptions",
+                                // Dashboard V2 — subscription summary / lists / export
+                                "/api/v1/admin/dashboard/subscriptions",
+                                "/api/v1/admin/dashboard/subscriptions/**",
                                 "/api/v1/subscription-packages/**",
                                 "/api/v3/subscription-packages",
                                 "/api/v3/subscription-packages/**",
@@ -522,6 +530,11 @@ public class ApiGatewayApplication {
                                 "/api/v1/admin/goals",
                                 "/api/v1/admin/dashboard/kpi-summary",
                                 "/api/v1/admin/dashboard/customer-growth",
+                                // Dashboard V2 BFF (summary / customers / saved views)
+                                "/api/v1/admin/dashboard/summary",
+                                "/api/v1/admin/dashboard/customers",
+                                "/api/v1/admin/dashboard/views",
+                                "/api/v1/admin/dashboard/views/{viewId}",
                                 "/api/v1/admin/goals/{code}",
                                 "/api/v1/bmi/calculate",
                                 "/api/v1/public/landing/goals",
